@@ -1,0 +1,31 @@
+{% extends 'trainer/base.html' %}{% block title %}Progress{% endblock %}{% block content %}
+<div class="pagehead"><div><div class="eyebrow"><b></b> Training log</div><h1>Your progress</h1><p>Matchups you’ve practiced and when they’re due for review.</p></div></div>
+<section class="card chart recovery"><h2>Use your progress on another device</h2>
+{% if notice %}<p role="status">{{ notice }}</p>{% endif %}
+{% if confirmation %}
+<h3>Open the recovered profile?</h3>
+<p>This browser’s profile has <strong>{{ current_total }}</strong> practice answer{{ current_total|pluralize }}. The recovered profile has <strong>{{ restored_total }}</strong>. Continuing will open the recovered profile on this device. Each profile keeps its own answers.</p>
+<p>To keep access to your current profile, cancel and save its recovery phrase first.</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="confirmation" value="{{ confirmation }}">
+<button class="primary" name="action" value="confirm">Use recovered profile</button> <a href="{% url 'progress' %}">Cancel</a></form>
+{% else %}
+{% if issued_phrase %}
+<label for="issued"><strong>Your recovery phrase</strong></label>
+<textarea id="issued" rows="2" readonly spellcheck="false">{{ issued_phrase }}</textarea>
+<button type="button" hidden id="copy-phrase">Copy phrase</button> <span id="copy-status" role="status"></span>
+<p>Save these nine Pokémon names in order. This phrase is shown once. Anyone with it can open your progress.</p>
+{% elif recovery_hash %}
+<p>Your recovery phrase is active. Enter it on your other device to continue the same lesson.</p>
+<details><summary>Replace a lost phrase</summary><p>Replacing the phrase disables the previous one. Connected devices keep their access.</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="previous" value="{{ recovery_hash }}"><button class="primary" name="action" value="replace">Replace recovery phrase</button></form></details>
+{% else %}
+<p>Get a private phrase made of nine Pokémon names to link your phone and laptop.</p>
+<form method="post">{% csrf_token %}<button class="primary" name="action" value="generate">Get recovery phrase</button></form>
+{% endif %}
+<details><summary>Restore progress with a phrase</summary>
+<form method="post">{% csrf_token %}<label for="restore">Enter the nine Pokémon names in order</label>
+<input id="restore" type="password" name="phrase" maxlength="256" required autocomplete="off" spellcheck="false" autocapitalize="none">
+<button class="primary" name="action" value="restore">Restore progress</button></form></details>
+{% endif %}</section>
+<section class="card chart"><div class="statsline"><div><strong>{{ count }}</strong>Answered today</div><div><strong>{{ correct_count }}</strong>Correct today</div><div><strong>{{ remembered }}</strong>Recalled on a later day</div></div>
+{% if rows %}<table><thead><tr><th>Move → Defender</th><th>Next review</th><th>Recall</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ row.matchup }}</td><td>{{ row.due|date:"M j, Y" }}</td><td>{% if row.remembered %}Recalled later{% else %}Learning{% endif %}</td></tr>{% endfor %}</tbody></table>{% else %}<p>Your first answer starts your training log.</p>{% endif %}<a class="primary" href="{% url 'practice' %}">Back to practice →</a></section>{% endblock %}

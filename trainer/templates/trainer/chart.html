@@ -1,0 +1,4 @@
+{% extends 'trainer/base.html' %}{% block title %}Type chart{% endblock %}{% block content %}
+<div class="pagehead"><div><div class="eyebrow"><b></b> Field guide</div><h1>Type chart</h1><p>Pick a move type to see its effectiveness against each defender.</p></div></div>
+<section class="card chart"><form method="get"><label for="move">Move type</label> <select id="move" name="move">{% for type in types %}<option {% if type == selected %}selected{% endif %}>{{ type }}</option>{% endfor %}</select> <button class="primary">Show matchups</button></form>
+<h2>{{ selected }} moves</h2>{% for group in groups %}{% if group.types %}<div class="chartrow"><h3>{{ group.label }} <small>{{ group.factor }}</small></h3><div>{% for t in group.types %}<span class="chip">{{ t }}</span>{% endfor %}</div></div>{% endif %}{% endfor %}</section>{% endblock %}

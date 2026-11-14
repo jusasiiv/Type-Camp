@@ -1,0 +1,10 @@
+{% load static %}<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123d32"><title>{% block title %}Practice{% endblock %} · Type Camp</title>
+<link rel="stylesheet" href="{% static 'trainer/camp.css' %}?v=3"><script defer src="{% static 'trainer/camp.js' %}?v=3"></script></head>
+<body><header><div class="bar"><a class="brand" href="{% url 'practice' %}"><i class="ball"></i>Type Camp</a>
+<nav aria-label="Main navigation">
+<a href="{% url 'practice' %}" {% if page == 'practice' %}aria-current="page"{% endif %}>Practice</a>
+<a href="{% url 'chart' %}" {% if page == 'chart' %}aria-current="page"{% endif %}>Type chart</a>
+<a href="{% url 'progress' %}" {% if page == 'progress' %}aria-current="page"{% endif %}>Progress</a></nav></div></header>
+<main>{% block content %}{% endblock %}</main><footer>Type Camp <span>Pokémon GO type trainer</span></footer></body></html>

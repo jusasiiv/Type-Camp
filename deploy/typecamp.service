@@ -1,0 +1,17 @@
+[Unit]
+Description=Type Camp Pokémon GO trainer
+After=network.target
+
+[Service]
+User=typecamp
+Group=typecamp
+WorkingDirectory=/srv/typecamp
+EnvironmentFile=/srv/typecamp/.env
+StateDirectory=typecamp
+StateDirectoryMode=0700
+ExecStartPre=/srv/typecamp/.venv/bin/python manage.py migrate --noinput
+ExecStart=/srv/typecamp/.venv/bin/gunicorn --bind 127.0.0.1:8100 --workers 2 config.wsgi:application
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

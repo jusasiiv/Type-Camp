@@ -1,19 +1,8 @@
+Disclaimer: This software was build using OpenAI's ChatGPT Codex as a means to evaluate the capabilities. This code has not been reviewed by a human. Use it at your own risk, you have been warned!
+
 # Type Camp
 
 A mobile-first Pokémon GO type trainer built with Django 5.2, SQLite, HTML, CSS, and plain browser JavaScript. JavaScript updates the lesson card in place. Standard forms also support the entire practice flow.
-
-## Run locally
-
-Use Python 3.10–3.14. From the project directory on Windows:
-
-```powershell
-py -m venv .venv
-.\.venv\Scripts\python -m pip install -r requirements.txt
-.\.venv\Scripts\python manage.py migrate
-.\.venv\Scripts\python manage.py runserver
-```
-
-Open <http://127.0.0.1:8000/>. Run the tests with `.\.venv\Scripts\python manage.py test`.
 
 ## Practice and persistence
 

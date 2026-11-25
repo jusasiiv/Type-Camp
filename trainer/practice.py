@@ -3,9 +3,10 @@ import random
 import uuid
 
 from .models import Review
-from .rules import CHART, DUALS, LABELS, STARTERS, exponent, multiplier, result
+from .progression import progression
+from .rules import CHART, DUALS, LABELS, exponent, multiplier, result
 
-DECKS = {"starter": "Starter types", "single": "All 18 types", "dual": "Dual types"}
+DECKS = {"progressive": "Guided progression", "single": "All 18 types", "dual": "All dual types"}
 SPRITES = {
     "Water": ("Squirtle", 7), "Fire": ("Charmander", 4), "Grass": ("Tangela", 114),
     "Normal": ("Rattata", 19), "Electric": ("Pikachu", 25), "Ice": ("Glaceon", 471),
@@ -18,10 +19,13 @@ DUAL_SPRITES = {"Swampert": 260, "Charizard": 6, "Rayquaza": 384, "Magcargo": 21
                 "Venusaur": 3, "Gyarados": 130, "Gengar": 94}
 
 
-def pairs(deck):
-    defenders = DUALS.values() if deck == "dual" else [
-        (kind,) for kind in (STARTERS if deck == "starter" else CHART)]
-    moves = STARTERS if deck == "starter" else CHART
+def pairs(deck, progress):
+    if deck == "progressive":
+        moves = progress["singles"]
+        defenders = [(kind,) for kind in moves] + list(progress["duals"])
+    else:
+        moves = CHART
+        defenders = DUALS.values() if deck == "dual" else [(kind,) for kind in CHART]
     return [(move, types) for types in defenders for move in moves]
 
 
@@ -30,18 +34,21 @@ def key(move, types):
 
 
 def next_question(trainer, today):
-    pool = pairs(trainer.deck)
+    progress = progression(trainer)
+    pool = pairs(trainer.deck, progress)
     attempts = trainer.attempt_set
     count = attempts.count()
     reviews = {r.matchup: r for r in trainer.review_set.all()}
     recent = set(attempts.order_by("-id").values_list("matchup", flat=True)[:2])
     previous_key = trainer.question.get("key")
-    allowed = STARTERS if trainer.deck == "starter" else CHART
+    allowed = progress["singles"] if trainer.deck == "progressive" else CHART
+    focus = progress["focus"] if trainer.deck == "progressive" else ()
     choose_move = count % 4 == 3 or attempts.filter(day=today).count() == 9
     if choose_move:
         pool = [(move, types) for move, types in pool if
                 sum(result(other, types) < result(move, types) for other in allowed) >= 2]
     def priority(pair):
+        move, types = pair
         matchup = key(*pair)
         review = reviews.get(matchup)
         if review and review.retry_after is not None and count >= review.retry_after:
@@ -52,9 +59,12 @@ def next_question(trainer, today):
             rank = 2
         else:
             rank = 3
-        return (matchup == previous_key, rank, matchup in recent, random.random())
+        # Teach the newest unlock before other unseen facts, while preserving
+        # the priority of missed and due reviews.
+        focused = types == focus or (len(focus) == 1 and (move == focus[0] or focus[0] in types))
+        return (matchup == previous_key, rank, matchup in recent, not focused, random.random())
 
-    move, types = min(pool, key=priority) if count or trainer.deck != "starter" else ("Water", ("Fire",))
+    move, types = min(pool, key=priority) if count or trainer.deck != "progressive" else ("Water", ("Fire",))
     power = result(move, types)
     question = {"token": str(uuid.uuid4()), "move": move, "types": list(types), "key": key(move, types),
                 "kind": "effect", "correct": str(power)}
@@ -73,6 +83,7 @@ def next_question(trainer, today):
 
 def record(trainer, question, answer, today):
     correct = answer == question["correct"]
+    before = progression(trainer) if correct else None
     trainer.attempt_set.create(token=question["token"], matchup=question["key"], day=today, correct=correct)
     review, created = Review.objects.get_or_create(trainer=trainer, matchup=question["key"],
         defaults={"last_day": today, "due": today + timedelta(days=1)})
@@ -90,6 +101,10 @@ def record(trainer, question, answer, today):
     review.last_day = today
     review.save()
     question["answer"] = answer
+    if correct:
+        after = progression(trainer)
+        if after["earned"] > before["earned"]:
+            question["unlocked"] = before["next"]
 
 
 def display(question):
@@ -98,8 +113,8 @@ def display(question):
     options = [{"value": v, "label": LABELS[int(v)] if question["kind"] == "effect" else v,
                 "number": multiplier(int(v)) if question["kind"] == "effect" else ""}
                for v in question["options"]]
-    named = next((name for name, dual in DUALS.items() if tuple(types) == dual), "")
-    defender_name, defender_sprite = SPRITES[types[0]] if len(types) == 1 else (named, DUAL_SPRITES[named])
+    named = next((name for name, dual in DUALS.items() if set(types) == set(dual)), "")
+    defender_name, defender_sprite = SPRITES[types[0]] if len(types) == 1 else (named, DUAL_SPRITES.get(named))
     return {**question, "options": options, "defender": " / ".join(types), "defender_name": defender_name,
             "defender_sprite": defender_sprite, "move_sprite": SPRITES.get(move, ("", None))[1],
             "feedback": f"{move} against {' / '.join(types)} is {LABELS[power].lower()}.",

@@ -1,5 +1,6 @@
 {% extends 'trainer/base.html' %}{% block title %}Progress{% endblock %}{% block content %}
 <div class="pagehead"><div><div class="eyebrow"><b></b> Training log</div><h1>Your progress</h1><p>Matchups you’ve practiced and when they’re due for review.</p></div></div>
+{% include 'trainer/unlocks.html' %}
 <section class="card chart recovery"><h2>Use your progress on another device</h2>
 {% if notice %}<p role="status">{{ notice }}</p>{% endif %}
 {% if confirmation %}

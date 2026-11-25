@@ -9,6 +9,7 @@ from django.views.decorators.debug import sensitive_post_parameters, sensitive_v
 
 from .models import Trainer
 from .practice import DECKS, display, next_question, record
+from .progression import progression
 from .rules import CHART, LABELS, exponent, multiplier
 from .recovery import fingerprint, new_phrase
 
@@ -80,7 +81,8 @@ def practice(request):
     if request.method == "POST" and request.headers.get("X-Trainer-Fragment") != "1":
         return remember(redirect("practice"), trainer)
     data = {**stats(trainer, today), "trainer": trainer, "q": display(q) if q else None,
-            "decks": DECKS, "deck_name": DECKS[trainer.deck], "page": "practice"}
+            "decks": DECKS, "deck_name": DECKS[trainer.deck], "page": "practice",
+            "progression": progression(trainer)}
     template = "lesson" if request.headers.get("X-Trainer-Fragment") == "1" else "practice"
     return remember(render(request, f"trainer/{template}.html", data), trainer)
 
@@ -152,4 +154,4 @@ def progress(request):
     rows = [{"matchup": r.matchup.replace(":", " → "), "due": r.due, "remembered": r.recalled_later}
             for r in trainer.review_set.order_by("due", "matchup")]
     return remember(render(request, "trainer/progress.html", {
-        **data, "rows": rows, **stats(trainer, today)}), trainer)
+        **data, "rows": rows, "progression": progression(trainer), **stats(trainer, today)}), trainer)

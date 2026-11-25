@@ -2,7 +2,8 @@
 <div class="pagehead"><div><div class="eyebrow"><b></b> Pokémon GO training</div><h1 tabindex="-1">Matchup practice</h1>
 <p>Learn how each move type matches up against a defender.</p></div>
 <details class="deckpicker"><summary>{{ deck_name }} <span aria-hidden="true">⌄</span></summary><form method="post">{% csrf_token %}
-<input type="hidden" name="action" value="deck">{% for value,name in decks.items %}<button name="deck" value="{{ value }}">{{ name }}</button>{% endfor %}</form></details></div>
+<input type="hidden" name="action" value="deck">{% for value,name in decks.items %}<button name="deck" value="{{ value }}" aria-pressed="{% if trainer.deck == value %}true{% else %}false{% endif %}">{{ name }}</button>{% endfor %}</form></details></div>
+{% if trainer.deck != 'progressive' %}<p class="mode-note">Practicing {% if trainer.deck == 'dual' %}all {{ progression.dual_total }} dual combinations{% else %}all 18 single types{% endif %}. Correct answers still count toward your guided unlocks.</p>{% endif %}
 <div class="layout"><section class="card lesson-card">
 {% if trainer.summary %}
 <div class="summary"><i class="ball"></i><div class="eyebrow">Session summary</div><h2>{% if count >= goal %}Daily goal complete!{% else %}Practice saved{% endif %}</h2>
@@ -25,7 +26,8 @@
 {% for option in q.options %}<button class="answer {% if q.answered and option.value == q.correct %}right{% elif q.answered and option.value == q.answer %}wrong{% endif %}" name="choice" value="{{ option.value }}" {% if q.answered %}disabled{% endif %}>
 <span>{{ option.label }}</span>{% if option.number %}<small>{{ option.number }}</small>{% endif %}</button>{% endfor %}
 {% if not q.answered %}<button class="unsure" name="choice" value="?">I don’t know yet</button>{% endif %}</form>
-{% if q.answered %}<div class="feedback" tabindex="-1" role="status"><b>{% if q.right %}Correct!{% elif q.answer == '?' %}Here’s the matchup{% else %}Review this matchup{% endif %}</b><p>{{ q.feedback }} {{ q.math }}</p></div>
+{% if q.answered %}<div class="feedback" tabindex="-1" role="status"><b>{% if q.right %}Correct!{% elif q.answer == '?' %}Here’s the matchup{% else %}Review this matchup{% endif %}</b><p>{{ q.feedback }} {{ q.math }}</p>
+{% if q.unlocked %}<p class="unlock-notice"><strong>Unlocked: {{ q.unlocked }}!</strong> {% if trainer.deck == 'progressive' %}Added to your upcoming practice.{% else %}Ready in guided progression.{% endif %}</p>{% endif %}</div>
 <form method="post">{% csrf_token %}<input type="hidden" name="token" value="{{ q.token }}"><button class="primary" name="action" value="next">{% if count == goal %}See daily summary{% else %}Next question{% endif %} →</button></form>{% endif %}</div>
 {% endif %}</section>
 <aside><section class="card daily"><div class="eyebrow"><b></b> Daily progress</div><h2>Today’s session</h2>
@@ -34,6 +36,7 @@
 <div class="stat"><span>Correct today</span><strong>{{ correct_count }}</strong></div>
 <div class="stat"><span>Recalled on a later day</span><strong>{{ remembered }}</strong></div>
 {% if count and not trainer.summary %}<form method="post">{% csrf_token %}<button class="textbtn" name="action" value="finish">End session</button></form>{% endif %}</section>
-<section class="fieldnote"><div class="eyebrow"><i class="book" aria-hidden="true">▤</i> Field notes</div><h2>{% if trainer.deck == 'dual' %}Two types, one matchup{% else %}The starter triangle{% endif %}</h2>
-<details><summary>Read the field note</summary><p>{% if trainer.deck == 'dual' %}Check the move against each defending type, then multiply the two results.{% else %}Water beats Fire, Fire beats Grass, and Grass beats Water. Each advantage gives the move a 1.6× multiplier.{% endif %}</p></details>
+{% include 'trainer/unlocks.html' %}
+<section class="fieldnote"><div class="eyebrow"><i class="book" aria-hidden="true">▤</i> Field notes</div><h2>{% if q.types|length == 2 or trainer.deck == 'dual' %}Two types, one matchup{% elif trainer.deck == 'progressive' and progression.single_count == 3 %}The first three types{% else %}Every type has a matchup{% endif %}</h2>
+<details><summary>Read the field note</summary><p>{% if q.types|length == 2 or trainer.deck == 'dual' %}Check the move against each defending type, then multiply the two results.{% elif trainer.deck == 'progressive' and progression.single_count == 3 %}Water beats Fire, Fire beats Grass, and Grass beats Water. Each advantage gives the move a 1.6× multiplier.{% else %}Check the attacking move against the defending type. In Pokémon GO, an advantage gives 1.6× damage; resistance gives 0.625× or 0.390625×.{% endif %}</p></details>
 <a href="{% url 'chart' %}">Explore the type chart <span>↗</span></a></section></aside></div>

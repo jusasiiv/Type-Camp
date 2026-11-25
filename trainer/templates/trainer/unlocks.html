@@ -1,0 +1,19 @@
+<section class="card unlocks" aria-labelledby="unlocks-heading">
+<div class="eyebrow"><b></b> Your learning path</div>
+<h2 id="unlocks-heading">{{ progression.single_count }} / 18 types unlocked</h2>
+<p class="unlock-count">{{ progression.dual_count }} / {{ progression.dual_total }} dual combinations unlocked</p>
+{% if progression.complete %}
+<p><strong>Everything unlocked!</strong> Keep practicing all single and dual types in guided progression.</p>
+{% else %}
+<p><strong>Next: {{ progression.next }}</strong></p>
+<progress value="{{ progression.toward_next }}" max="{{ progression.target }}" aria-label="Correct answers toward the next unlock">{{ progression.toward_next }} / {{ progression.target }}</progress>
+<p>{{ progression.remaining }} more correct answer{{ progression.remaining|pluralize }} to unlock.</p>
+{% endif %}
+<details><summary>How unlocks work</summary>
+<p>Start with Water, Fire, and Grass. Every {{ progression.target }} correct answers unlocks one more type. After all 18, unlock dual combinations one at a time.</p>
+<p>Correct answers in every mode count, across days and devices. Mistakes don’t take away progress. Use the practice menu to jump to all single or dual types anytime.</p>
+<p><strong>Unlocked move and defender types</strong></p>
+<div class="unlocked-types">{% for type in progression.singles %}<span class="chip">{{ type }}</span>{% endfor %}</div>
+{% if progression.duals %}<p><strong>Unlocked dual defenders</strong></p><div class="unlocked-types">{% for types in progression.duals %}<span class="chip">{{ types|join:' / ' }}</span>{% endfor %}</div>{% endif %}
+</details>
+</section>

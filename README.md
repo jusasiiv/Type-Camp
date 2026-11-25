@@ -1,12 +1,20 @@
 # Type Camp
 
-Type Camp is a phone-friendly trainer for Pokémon GO players who want to recall type matchups during battles. Start with Water, Fire, and Grass, then practice all 18 types and dual-type defenders. Each answer shows the GO multiplier. Water against Fire/Rock, for example, gets two advantages for a total of **1.6 × 1.6 = 2.56×**.
+Type Camp is a phone-friendly trainer for Pokémon GO players who want to recall type matchups during battles. Guided progression starts with Water, Fire, and Grass, then unlocks all 18 types and gradually introduces dual-type defenders. Each answer shows the GO multiplier. Water against Fire/Rock, for example, gets two advantages for a total of **1.6 × 1.6 = 2.56×**.
 
 > **AI disclaimer**
 >
 > OpenAI’s ChatGPT Codex wrote all of this project’s code as an experiment to evaluate its capabilities. The code has not been reviewed by a human. Use it at your own risk.
 
 The daily goal is ten questions. Keep practicing for as long as you like. Your browser remembers your profile automatically. To share progress with another device, open **Progress → Get recovery phrase** and enter the nine Pokémon names on the other device.
+
+## How progression works
+
+Every **10 correct answers** unlocks one more type, for both attacking moves and single-type defenders. All 18 single types are available after 150 correct answers; the first dual combination unlocks at 160. Each following set of 10 correct answers adds one dual combination, while keeping the single types and earlier dual combinations in practice. Missed and due reviews retain priority; other new questions favor the latest unlock.
+
+The practice menu also offers **All 18 types** and **All dual types** immediately. Correct answers in every mode contribute to guided progression, including existing practice history. Returning to guided progression keeps your earned unlocks. Mistakes never remove unlocks, and progress carries across days and linked devices. The daily goal still counts all answers, independently of unlocks.
+
+The bundled catalog covers **139 unique dual combinations** marked released in [PvPoke’s Pokémon GO roster](https://github.com/pvpoke/pvpoke/blob/a2dfcacab516ff0826ce7cfa2b4ac1cc10112587/src/data/gamemaster/pokemon.json), checked on November 25, 2026, including regional forms and Mega Evolutions. Type order does not create a second combination. The app needs no live data service. To include future GO releases, update `trainer/dual_types.py` from released entries in that roster and append new combinations without reordering existing ones. Keep the seven legacy examples and their type order to preserve saved review keys.
 
 ## Why the lessons work this way
 

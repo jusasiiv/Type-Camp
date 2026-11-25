@@ -4,7 +4,7 @@ from django.db import models
 
 class Trainer(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    deck = models.CharField(max_length=16, default="starter")
+    deck = models.CharField(max_length=16, default="progressive")
     question = models.JSONField(default=dict)
     summary = models.BooleanField(default=False)
     day = models.DateField()

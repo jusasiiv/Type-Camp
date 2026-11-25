@@ -1,6 +1,8 @@
 """Pokémon GO effectiveness in powers of 1.6, indexed by attacking move type."""
 from decimal import Decimal
 
+from .dual_types import DUALS
+
 # Weak, resistant, strongly resistant defenders, respectively.
 CHART = {
     "Fire": ("Grass Ice Bug Steel", "Fire Water Rock Dragon", ""),
@@ -24,11 +26,6 @@ CHART = {
 }
 LABELS = {-3: "Triply resisted", -2: "Doubly resisted", -1: "Resisted",
           0: "Neutral", 1: "Super effective", 2: "Doubly super effective"}
-STARTERS = ("Water", "Fire", "Grass")
-DUALS = {"Swampert": ("Water", "Ground"), "Charizard": ("Fire", "Flying"),
-         "Rayquaza": ("Dragon", "Flying"), "Magcargo": ("Fire", "Rock"),
-         "Venusaur": ("Grass", "Poison"), "Gyarados": ("Water", "Flying"),
-         "Gengar": ("Ghost", "Poison")}
 
 
 def exponent(move, defender):
